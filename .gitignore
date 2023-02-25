@@ -1,0 +1,8 @@
+# ignore all files with extension:
+*.data
+*.json
+*.log
+
+# ignore all files in any directories:
+/__pycache__
+azure/__pycache__
