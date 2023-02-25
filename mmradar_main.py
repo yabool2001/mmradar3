@@ -28,9 +28,9 @@ import logging
 import pprint
 
 import datetime
-import file_ops2
-import mmradar3_ops
-import mmradar3_pc3d
+import file_ops
+import mmradar_ops
+import mmradar_pc3d
 import socket
 import serial
 import serial_ops2
