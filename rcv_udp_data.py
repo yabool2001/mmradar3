@@ -28,13 +28,20 @@ src_udp_ctrl_rx = socket.socket ( socket.AF_INET , socket.SOCK_DGRAM )
 src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_udp_port ) )
 
 ##################### READ DATA #################################
-while True :
-    try :
-        ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
-        pprint.pprint ( ctrl.decode() )
-        pprint.pprint ( address[0] )
-    except struct.error as e :
-        print ( e )
+pprint.pprint ( src_udp_ip )
+#while True :
+#    try :
+#        ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
+#        pprint.pprint ( ctrl.decode() )
+#        pprint.pprint ( address[0] )
+#    except struct.error as e :
+#        print ( e )
+try :
+    ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
+    pprint.pprint ( ctrl.decode() )
+    pprint.pprint ( address[0] )
+except struct.error as e :
+    print ( e )
 ################# CLOSE DATA COM PORT FILE ######################
-src_udp_data_rx.close ()
+#src_udp_data_rx.close ()
 src_udp_ctrl_rx.close ()
