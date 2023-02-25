@@ -22,7 +22,7 @@
 import sys
 #sys.setdefaultencoding('utf-8')
 #sys.path.append ( "/Users/mzeml/python/mmradar3/modules/" )
-sys.path.append ( "~/python/mmradar3/modules/" )
+sys.path.append ( "/Users/mzeml/python/mmradar3/modules/" )
 sys.path.append ( "/home/mzemlo/mmradar3/modules/" )
 import logging
 import pprint
@@ -33,7 +33,7 @@ import mmradar_ops
 import mmradar_pc3d
 import socket
 import serial
-import serial_ops2
+import serial_ops
 import threading
 import time
 
@@ -44,8 +44,8 @@ import time
 ### DEFINITIONS 
 ################################################################
 
-data_src                        = 2 # 0: device, 1: UDP, 2: file
-cfg_chirp                       = 0 # 0: no cfg, 1: sensor start, 2: full cfg
+data_src                        = 0 # 0: device, 1: UDP, 2: file
+cfg_chirp                       = 2 # 0: no cfg, 1: sensor start, 2: full cfg
 data_dst                        = 2 # 0: Azure, 1: UDP, 2: file
 raw_byte                        = bytes(1)
 frames_limit                    = 0
@@ -98,15 +98,15 @@ if data_src == 0 :
     logging.info ( f"############# Direct device sourcing.\n")
     conf_com = serial.Serial ()
     data_com = serial.Serial ()
-    serial_ops2.set_serials_cfg ( conf_com , data_com )
-    serial_ops2.open_serial_ports ( conf_com , data_com )
+    serial_ops.set_serials_cfg ( conf_com , data_com )
+    serial_ops.open_serial_ports ( conf_com , data_com )
     if cfg_chirp == 0 :
         logging.info ( f"############# Device no cfg.\n")
     elif cfg_chirp ==  1 :
-        mmradar3_ops.mmradar_conf ( cfg_chirp_start_file_name , conf_com )
+        mmradar_ops.mmradar_conf ( cfg_chirp_start_file_name , conf_com )
         logging.info ( f"############# Device started.\n")
     elif cfg_chirp ==  2 : # full cfg
-        mmradar3_ops.mmradar_conf ( cfg_chirp_full_file_name , conf_com )
+        mmradar_ops.mmradar_conf ( cfg_chirp_full_file_name , conf_com )
         print ( "\n############# Device full cfg.\n" )
         logging.info ( f"############# Device full cfg.\n")
     conf_com.close ()
@@ -140,7 +140,7 @@ elif data_dst == 2 :
 i = 0
 while i < frames_limit or data_src < 2 :
     if data_src == 0 :
-        pc3d_object = mmradar3_pc3d.PC3D ( data_com )
+        pc3d_object = mmradar_pc3d.PC3D ( data_com )
         if pc3d_object.get_frame_header () :
             pc3d_object.get_tlvs ()
     elif data_src == 1 :
