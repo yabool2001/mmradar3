@@ -5,11 +5,11 @@ import struct
 
 
 class PC3D :
-    def __init__ ( self , data_com ) :
-        self.data_com = data_com
+    def __init__ ( self ) :
         self.tlvs_bytes = bytearray(b'')
         #self.control = 506660481457717506 # poprzednio używana w wersji 2 wartość decimal
         self.control = bytearray ( b'\x02\x01\x04\x03\x06\x05\x08\x07' )
+        self.control_decimal = 506660481457717506
         self.control_leght = len ( self.control )
         self.v_type_point_cloud = 1020
         self.v_type_targets = 1010
@@ -19,6 +19,8 @@ class PC3D :
         self.frame_dict = dict ()
         self.frame_header_wo_control_struct = '8I'
         self.frame_header_wo_control_length = struct.calcsize ( self.frame_header_wo_control_struct )
+        self.frame_header_struct = 'Q' + self.frame_header_wo_control_struct
+        self.frame_header_length = struct.calcsize ( self.frame_header_struct )
         self.tlv_dict = dict ()
         self.tlv_list = []
         self.tl_struct = '2I'
@@ -188,12 +190,12 @@ class PC3D :
         self.tlvs_json = self.tlvs_json + "]"
         self.tlv_list.clear ()
 
-    def get_frame_header ( self ) :
+    def get_frame_header_from_device ( self , data_com ) :
         frame_header_dict = dict ()
         control_error = 0
-        self.data_com.reset_input_buffer ()
-        self.data_com.reset_output_buffer ()
-        control = self.data_com.read ( self.control_leght )
+        data_com.reset_input_buffer ()
+        data_com.reset_output_buffer ()
+        control = data_com.read ( self.control_leght )
         while ( control != self.control ) : # nidgy w testach nie okazało się potrzebne to skomplikowane co jest poniżej. Może wystaczyłby jedynie return False
             control_error += 1 # do usunięcie i ew. zamiany na logging
             if ( control_error == 10000 ) : # jw.
@@ -201,20 +203,43 @@ class PC3D :
                 return False
             index_b2 = control.find ( self.control[0] ) # sprawdź czy w śrdoku nie ma bajtu będącego początkiem control, jeśli był to spróbuj czy nie jest to początek control 
             if index_b2 == -1 :
-                control = self.data_com.read ( self.control_leght )
+                control = data_com.read ( self.control_leght )
             else :
                 control = control[index_b2:]
-                control = control + self.data_com.read ( self.control_leght - self.control_leght )
+                control = control + data_com.read ( self.control_leght - self.control_leght )
         try :
-            frame_header = self.data_com.read ( self.frame_header_wo_control_length )
+            frame_header = data_com.read ( self.frame_header_wo_control_length )
             version , total_packet_length , platform , frame_number , time , number_of_points , number_of_tlvs , subframe_number = struct.unpack ( self.frame_header_wo_control_struct , frame_header[:self.frame_header_wo_control_length] )
             frame_header_dict = { 'frame_number' : frame_number , 'number_of_tlvs' : number_of_tlvs , 'number_of_points' : number_of_points , 'subframe_number' : subframe_number , 'version' : version , 'total_packet_length' : total_packet_length , 'platform' : platform , 'time' : time }
             logging.info ( f"Got frame number: {frame_number}" )
-            self.tlvs_bytes = self.data_com.read ( total_packet_length - ( self.control_leght + self.frame_header_wo_control_length ) ) # do usunięcia
+            self.tlvs_bytes = data_com.read ( total_packet_length - ( self.control_leght + self.frame_header_wo_control_length ) ) # do usunięcia
         except struct.error as e :
             frame_header_dict = { 'error' : e }
             logging.info ( f"Frame header unpack error: {e} during frame unpack number: {frame_header_dict}" )
         self.frame_dict['frame_header'] = frame_header_dict
+        if frame_header_dict.get ( 'error' ) :
+            return False
+        else :
+            return True
+
+    def get_frame_header_from_saved_bytes ( self , frame ) :
+        try:
+            control , version , total_packet_length , platform , frame_number , time , number_of_points , number_of_tlvs , subframe_number = struct.unpack ( self.frame_header_struct , frame[:self.frame_header_length] )
+            logging.info ( f"Got frame number: {frame_number}" )
+            #if frame_number == 840 : # TLV Header unpack error unpack requires a buffer of 8 bytes. Error in get_tlv() in frame nr: 840 & 885
+            #    pass
+            #x = control.to_bytes(8, byteorder='little')
+            #if control.to_bytes(8, byteorder='little') == self.control : # UWAGAAAA! tutaj podczas debug miałem jakieś dziwne błędy pamięci. Może lepiej zamienić wszystko na decimal.
+            if control == self.control_decimal :
+                frame_header_dict = { 'frame_number' : frame_number , 'number_of_tlvs' : number_of_tlvs , 'number_of_points' : number_of_points , 'subframe_number' : subframe_number , 'version' : version , 'total_packet_length' : total_packet_length , 'platform' : platform , 'time' : time }
+            else :
+                frame_header_dict = { 'error' : f'control = {control}' }
+                logging.info ( f"Frame header control is not corrected: {control}." )
+        except struct.error as e :
+            frame_header_dict = { 'error' : e }
+            logging.info ( f"Frame header unpack error during frame unpack number: {frame_header_dict}" )
+        self.frame_dict['frame_header'] = frame_header_dict
+        self.tlvs_bytes = frame[self.frame_header_length:]
         if frame_header_dict.get ( 'error' ) :
             return False
         else :

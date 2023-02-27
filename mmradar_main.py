@@ -66,7 +66,7 @@ ctrl_udp_port                    = 10004
 data_udp_port                    = 10005
 
 def data_dst_2_thread () :
-    file_ops2.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) )
+    file_ops.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) )
 def data_dst_1_thread () :
     udp_data_tx.sendto ( str.encode ( str ( pc3d_object.frame_dict ) , "utf-8" ) , ( dst_udp_ip , data_udp_port ) )
 
@@ -140,15 +140,17 @@ elif data_dst == 2 :
 i = 0
 while i < frames_limit or data_src < 2 :
     if data_src == 0 :
-        pc3d_object = mmradar_pc3d.PC3D ( data_com )
-        if pc3d_object.get_frame_header () :
+        pc3d_object = mmradar_pc3d.PC3D ()
+        if pc3d_object.get_frame_header_from_device () :
             pc3d_object.get_tlvs ()
     elif data_src == 1 :
         logging.info (f"Error: data_src = 1. App exit!\n")
         exit ()
     elif data_src ==  2 :
-        logging.info (f"Error: data_src = 2. App exit!\n")
-        exit ()
+        pc3d_object = mmradar_pc3d.PC3D ()
+        if pc3d_object.get_frame_header_from_saved_bytes ( eval ( saved_bin_frames[i] ) ) :
+            pc3d_object.get_tlvs ()
+        i += 1
     if data_dst == 0 :
         logging.info (f"Error: data_dst = 0. App exit!\n")
         exit ()
@@ -157,10 +159,13 @@ while i < frames_limit or data_src < 2 :
         thread_data_dst_1 = threading.Thread ( target = data_dst_1_thread )
         thread_data_dst_1.start ()
     elif data_dst == 2 :
-        #file_ops2.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) ) # alternatywa dla 2 poniższych wierszy
+        #file_ops.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) ) # alternatywa dla 2 poniższych wierszy
         thread_data_dst_2 = threading.Thread ( target = data_dst_2_thread )
         thread_data_dst_2.start ()
     del pc3d_object
-udp_data_tx.close ()
-udp_ctrl_rx.close ()
-data_com.close ()
+
+if data_src == 0 :
+    data_com.close ()
+elif data_src == 1 or data_dst == 1 :
+    udp_data_tx.close ()
+    udp_ctrl_rx.close ()
