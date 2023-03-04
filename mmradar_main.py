@@ -15,7 +15,8 @@
 # tail -f mmradar.log
 # sudo tcpdump -A  port 10005ad
 # Rx test in linux system: sudo tcpdump -vv -A udp dst port 10004
-# Tx test in linux system: echo -n "hello" >/dev/udp/10.0.0.102/10004
+# Tx test in linux system: echo -n "ctrl.data_dst.3" >/dev/udp/10.0.0.102/10004
+# Tx test in linux system: echo -n "ctrl.data_dst_frame_divider.100" >/dev/udp/10.0.0.102/10004
 
 import os
 import sys
@@ -44,10 +45,10 @@ import time
 ################################################################
 
 data_src                        = 0 # 0: device, 1: UDP, 2: file
-cfg_chirp                       = 0 # 0: no cfg, 1: sensor start, 2: full cfg
+cfg_chirp                       = 2 # 0: no cfg, 1: sensor start, 2: full cfg
 cfg_ctrl                        = 1 # 0: no cfg, 1: udp cfg
 data_dst                        = 0 # 0: no dst, 1: UDP, 2: Azure, 3: file
-data_dst_frame_divider          = 1 # co która ramka ma być zapisywana
+data_dst_frame_divider          = 100 # co która ramka ma być zapisywana
 ctrl_start                      = 0
 raw_byte                        = bytes(1)
 frames_limit                    = 0
@@ -188,19 +189,20 @@ while ( i < frames_limit or data_src < 2 ) :
         if pc3d_object.get_frame_header_from_saved_bytes ( eval ( saved_bin_frames[i] ) ) :
             pc3d_object.get_tlvs ()
         i += 1
-    if int ( pc3d_object.frame_dict['frame_header'].get ( 'frame_number' ) ) % data_dst_frame_divider == 0 :
-        if data_dst == 0 :
-            pass
-        elif data_dst == 1 :
-            #udp_data_tx.sendto ( str.encode ( str ( pc3d_object.frame_dict ) , "utf-8" ) , ( dst_udp_ip , data_udp_port ) ) # alternatywa dla 2 poniższych wierszy
-            thread_data_dst_1 = threading.Thread ( target = data_dst_1_thread )
-            thread_data_dst_1.start ()
-        elif data_dst == 2 :
-            pass
-        elif data_dst == 3 :
-            #file_ops.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) ) # alternatywa dla 2 poniższych wierszy
-            thread_data_dst_3 = threading.Thread ( target = data_dst_3_thread )
-            thread_data_dst_3.start ()
+    if pc3d_object.frame_dict.get ('frame_header') :
+        if int ( pc3d_object.frame_dict['frame_header'].get ( 'frame_number' ) ) % data_dst_frame_divider == 0 :
+            if data_dst == 0 :
+                pass
+            elif data_dst == 1 :
+                #udp_data_tx.sendto ( str.encode ( str ( pc3d_object.frame_dict ) , "utf-8" ) , ( dst_udp_ip , data_udp_port ) ) # alternatywa dla 2 poniższych wierszy
+                thread_data_dst_1 = threading.Thread ( target = data_dst_1_thread )
+                thread_data_dst_1.start ()
+            elif data_dst == 2 :
+                pass
+            elif data_dst == 3 :
+                #file_ops.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) ) # alternatywa dla 2 poniższych wierszy
+                thread_data_dst_3 = threading.Thread ( target = data_dst_3_thread )
+                thread_data_dst_3.start ()
     del pc3d_object
 
 if data_src == 0 :
