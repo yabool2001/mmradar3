@@ -4,6 +4,7 @@
 
 
 # ToDo zamiast wywoływać thread w każdej pętli to w funkcji thread stworzyć while który będzie działał non-stop. Zrobię to w wersji 2 
+# Sprawdzić czy działa
 
 import sys
 sys.path.append ( "~/python/mmradar3/modules/" )
@@ -29,20 +30,18 @@ hello = "\n\n##########################################\n############# mmradar s
 
 def data_udp_ctrl_rx_thread () :
     global control
-    global udp_ctrl_listening
     src_udp_ctrl_rx = socket.socket ( socket.AF_INET , socket.SOCK_DGRAM )
     src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_udp_port ) )
-    try :
-        udp_ctrl_listening = 1 # Na wszelki wypadek równolegle z identyczną zmianą poza thread
-        ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
-        pprint.pprint ( ctrl.decode() )
-        pprint.pprint ( address[0] )
-        control = ctrl.decode()
-        src_udp_ctrl_rx.close ()
-    except struct.error as e :
-        print ( e )
-    udp_ctrl_listening = 0
-    #udp.sendto ( str.encode ( str ( pc3d_object.frame_dict ) , "utf-8" ) , ( dst_udp_ip , data_udp_port ) )
+    while True :
+        try :
+            ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
+            pprint.pprint ( ctrl.decode() )
+            pprint.pprint ( address[0] )
+            control = ctrl.decode()
+        except struct.error as e :
+            print ( e )
+    #src_udp_ctrl_rx.close ()
+        #udp.sendto ( str.encode ( str ( pc3d_object.frame_dict ) , "utf-8" ) , ( dst_udp_ip , data_udp_port ) )
 
 ################################################################
 ################ SOCKET Configuration ##########################
@@ -64,13 +63,8 @@ pprint.pprint ( src_udp_ip )
 if udp_ctrl_listening == 0 :
     thread_udp_ctrl_rx = threading.Thread ( target = data_udp_ctrl_rx_thread )
     thread_udp_ctrl_rx.start ()
-    udp_ctrl_listening = 1 # Na wszelki wypadek równolegle z identyczną zmianą wew. thread
 start_t = time.perf_counter ()
 while True :
-    if udp_ctrl_listening == 0 :
-        thread_udp_ctrl_rx = threading.Thread ( target = data_udp_ctrl_rx_thread )
-        thread_udp_ctrl_rx.start ()
-        udp_ctrl_listening = 1 # Na wszelki wypadek równolegle z identyczną zmianą wew. thread
     finish_t = time.perf_counter ()
     if finish_t - start_t > 2 :
         print ( control )
@@ -78,4 +72,4 @@ while True :
 
 ################# CLOSE DATA COM PORT FILE ######################
 #src_udp_data_rx.close ()
-src_udp_ctrl_rx.close ()
+#src_udp_ctrl_rx.close ()

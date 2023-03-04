@@ -1,7 +1,3 @@
-# Issue 1 - tlv list
-# Zamienić wszystkie self.tlv_header_length na self.tl_length
-# Napisać do ti, że tlv_length to jest tl_length. Jeśli to jest tlv, to mnie poprawcie. Moim zdaniem lepiej żeby była podawana całą wartość tlv
-
 # ToDo:
 # thread do wysyłania UDP i zapisywania do log
 # zarządzanie przez UDP
@@ -51,8 +47,8 @@ raw_byte                        = bytes(1)
 frames_limit                    = 0
 log_file_name                   = 'log/mmradar.log'
 data_file_name                  = 'mmradar.data'
-saved_parsed_data_file_name     = 'saved_parsed_data\mmradar.data.json'
-saved_bin_data_file_name        = 'saved_bin_data\mmradar_gen_1675746223207587500.bin_raw_data'
+saved_parsed_data_file_name     = 'saved_parsed_data/mmradar.data.json'
+saved_bin_data_file_name        = 'saved_bin_data/mmradar_gen_1675746223207587500.bin_raw_data'
 cfg_chirp_full_file_name        = 'chirp_cfg/ISK_6m_staticRetention.cfg'
 cfg_chirp_start_file_name       = 'chirp_cfg/sensor_start.cfg'
 #src_udp_ip                      = '192.168.43.227' # maczem raspberry pi 3b+
@@ -64,6 +60,21 @@ src_udp_ip                      = socket.gethostbyname ( socket.gethostname () )
 dst_udp_ip                      = '127.0.0.1' # maczem GO3 localhost
 ctrl_udp_port                    = 10004
 data_udp_port                    = 10005
+
+def data_udp_ctrl_rx_thread () :
+    #global control
+    src_udp_ctrl_rx = socket.socket ( socket.AF_INET , socket.SOCK_DGRAM )
+    src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_udp_port ) )
+    while True :
+        try :
+            ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
+            pprint.pprint ( ctrl.decode () )
+            pprint.pprint ( address[0] )
+            #control = ctrl.decode()
+        except struct.error as e :
+            print ( e )
+    #src_udp_ctrl_rx.close ()
+        #udp.sendto ( str.encode ( str ( pc3d_object.frame_dict ) , "utf-8" ) , ( dst_udp_ip , data_udp_port ) )
 
 def data_dst_2_thread () :
     file_ops.write_2_local_file ( saved_parsed_data_file_name , str ( pc3d_object.frame_dict ) )
@@ -136,6 +147,9 @@ elif data_dst == 1 :
     udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_udp_port ) )
 elif data_dst == 2 :
     pass
+
+thread_udp_ctrl_rx = threading.Thread ( target = data_udp_ctrl_rx_thread )
+thread_udp_ctrl_rx.start ()
 
 i = 0
 while i < frames_limit or data_src < 2 :
