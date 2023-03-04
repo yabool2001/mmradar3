@@ -17,6 +17,7 @@
 # Rx test in linux system: sudo tcpdump -vv -A udp dst port 10004
 # Tx test in linux system: echo -n "hello" >/dev/udp/10.0.0.102/10004
 
+import os
 import sys
 #sys.setdefaultencoding('utf-8')
 #sys.path.append ( "/Users/mzeml/python/mmradar3/modules/" )
@@ -91,6 +92,9 @@ def data_udp_ctrl_rx_thread () :
                 if ctrl_split[1] == "data_dst_frame_divider" :
                     if ctrl_split[2].isdigit()  :
                         data_dst_frame_divider = int ( ctrl_split[2] ) if int ( ctrl_split[2] ) >= 1 else 1
+                if ctrl_split[1] == "device" :
+                    if ctrl_split[2] == "reboot" :
+                        os.system ( 'reboot' )
             else :
                 logging.info ( f"############# Got unknownk command {ctrl.decode ()} from {address[0]}\n")
         except struct.error as e :
