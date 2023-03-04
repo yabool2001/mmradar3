@@ -40,8 +40,8 @@ import time
 ### DEFINITIONS 
 ################################################################
 
-data_src                        = 2 # 0: device, 1: UDP, 2: file
-cfg_chirp                       = 0 # 0: no cfg, 1: sensor start, 2: full cfg
+data_src                        = 0 # 0: device, 1: UDP, 2: file
+cfg_chirp                       = 2 # 0: no cfg, 1: sensor start, 2: full cfg
 data_dst                        = 2 # 0: Azure, 1: UDP, 2: file
 raw_byte                        = bytes(1)
 frames_limit                    = 0
