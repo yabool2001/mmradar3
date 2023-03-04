@@ -94,7 +94,7 @@ def data_udp_ctrl_rx_thread () :
                         data_dst_frame_divider = int ( ctrl_split[2] ) if int ( ctrl_split[2] ) >= 1 else 1
                 if ctrl_split[1] == "device" :
                     if ctrl_split[2] == "reboot" :
-                        os.system ( 'reboot' )
+                        os.system ( 'sudo reboot' )
             else :
                 logging.info ( f"############# Got unknownk command {ctrl.decode ()} from {address[0]}\n")
         except struct.error as e :

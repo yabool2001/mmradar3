@@ -53,7 +53,7 @@ def data_udp_ctrl_rx_thread () :
 #src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_udp_port ) )
 
 ##################### READ DATA #################################
-pprint.pprint ( src_udp_ip )
+#pprint.pprint ( src_udp_ip )
 #while True :
 #    try :
 #        ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
