@@ -128,7 +128,7 @@ class PC3D :
         try:
             v_type, v_length = struct.unpack ( self.tl_struct , self.tlvs_bytes[:self.tl_length] )
             tl_dict = { 'v_type' : v_type , 'v_length' : v_length }
-            logging.info ( f"Got tlv v_type: {v_type}" )
+            #logging.info ( f"Got tlv v_type: {v_type}" )
         except struct.error as e :
             tl_dict = { 'error' : e }
             logging.info ( f"TL unpack error {e} during frame number: {self.frame_dict['frame_header']['frame_number']}" )
@@ -157,7 +157,7 @@ class PC3D :
                     self.get_presence_indication ()
                     self.tlv_list.append ( self.tlv_dict.copy() ) # muszę kopiować, bo inaczej po skasowaniu źródła tracę dane
             else :
-                logging.info ( f"Error in match get_tlv in frame nr: {self.frame_dict['frame_header']['frame_number']}" )
+                #logging.info ( f"Error in match get_tlv in frame nr: {self.frame_dict['frame_header']['frame_number']}" )
                 self.tlv_dict['tl'] = { 'error' : "v_type not matched" }
                 self.tlv_list.append ( self.tlv_dict.copy() )
                 return False
@@ -211,7 +211,7 @@ class PC3D :
             frame_header = data_com.read ( self.frame_header_wo_control_length )
             version , total_packet_length , platform , frame_number , time , number_of_points , number_of_tlvs , subframe_number = struct.unpack ( self.frame_header_wo_control_struct , frame_header[:self.frame_header_wo_control_length] )
             frame_header_dict = { 'frame_number' : frame_number , 'number_of_tlvs' : number_of_tlvs , 'number_of_points' : number_of_points , 'subframe_number' : subframe_number , 'version' : version , 'total_packet_length' : total_packet_length , 'platform' : platform , 'time' : time }
-            logging.info ( f"Got frame number: {frame_number}" )
+            #logging.info ( f"Got frame number: {frame_number}" )
             self.tlvs_bytes = data_com.read ( total_packet_length - ( self.control_leght + self.frame_header_wo_control_length ) ) # do usunięcia
         except struct.error as e :
             frame_header_dict = { 'error' : e }
@@ -225,7 +225,7 @@ class PC3D :
     def get_frame_header_from_saved_bytes ( self , frame ) :
         try:
             control , version , total_packet_length , platform , frame_number , time , number_of_points , number_of_tlvs , subframe_number = struct.unpack ( self.frame_header_struct , frame[:self.frame_header_length] )
-            logging.info ( f"Got frame number: {frame_number}" )
+            #logging.info ( f"Got frame number: {frame_number}" )
             #if frame_number == 840 : # TLV Header unpack error unpack requires a buffer of 8 bytes. Error in get_tlv() in frame nr: 840 & 885
             #    pass
             #x = control.to_bytes(8, byteorder='little')
