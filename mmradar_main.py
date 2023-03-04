@@ -22,7 +22,7 @@ import sys
 #sys.setdefaultencoding('utf-8')
 #sys.path.append ( "/Users/mzeml/python/mmradar3/modules/" )
 sys.path.append ( "/Users/mzeml/python/mmradar3/modules/" )
-sys.path.append ( "/home/mzemlo/mmradar3/modules/" )
+sys.path.append ( "/home/mzemlo/python/mmradar3/modules/" )
 import logging
 import pprint
 
