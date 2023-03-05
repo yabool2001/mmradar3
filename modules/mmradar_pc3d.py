@@ -84,7 +84,7 @@ class PC3D :
                 target_dict = { 'target_id' : target_id , 'target_pos_x' : target_pos_x , 'target_pos_y' : target_pos_y , 'target_pos_z' : target_pos_z , 'target_vel_x' : target_vel_x , 'target_vel_y' : target_vel_y , 'target_vel_z' : target_vel_z , 'target_acc_x' : target_acc_x , 'target_acc_y' : target_acc_y , 'target_acc_z' : target_acc_z , 'err_covariance' : err_covariance , 'gain' : gain , 'confidence_level' :  confidence_level}
             except struct.error as e :
                 target_dict = { 'error' : e }
-                logging.info ( f"get_targets error {e} during frame number: {self.frame_dict['frame_header']['frame_number']}" )
+                #logging.info ( f"get_targets error {e} during frame number: {self.frame_dict['frame_header']['frame_number']}" )
             target_list.append ( target_dict )
         self.tlv_dict['targets'] = target_list
 

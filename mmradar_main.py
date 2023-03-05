@@ -25,7 +25,6 @@ import sys
 sys.path.append ( "/Users/mzeml/python/mmradar3/modules/" )
 sys.path.append ( "/home/mzemlo/python/mmradar3/modules/" )
 import logging
-import pprint
 
 import datetime
 import file_ops
@@ -142,7 +141,6 @@ if data_src == 0 :
         logging.info ( f"############# Device started.\n")
     elif cfg_chirp ==  2 : # full cfg
         mmradar_ops.mmradar_conf ( cfg_chirp_full_file_name , conf_com )
-        print ( "\n############# Device full cfg.\n" )
         logging.info ( f"############# Device full cfg.\n")
     conf_com.close ()
 elif data_src == 1:
