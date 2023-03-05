@@ -25,6 +25,35 @@ log_file_name                   = 'log/mmradar.log'
 
 hello = "\n\n##########################################\n########## rcv_udp_ctrl_device started ###\n##########################################\n"
 
+def udp_ctrl_device_thread () :
+    
+    global src_udp_ip
+    global ctrl_device_udp_port
+
+    ################################################################
+    ################ SOCKET Configuration ##########################
+    ################################################################
+    src_udp_ctrl_rx = socket.socket ( socket.AF_INET , socket.SOCK_DGRAM )
+    src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_device_udp_port ) )
+    logging.info ( f"Ctrl device started.")
+
+    while True :
+        try :
+            ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
+            logging.info ( f" Got {ctrl.decode ()} from {address[0]}\n")
+            ctrl_split = ( ctrl.decode ().split ( '.' ) )
+            if ctrl_split[0] == "ctrl" and address[0] in ctrl_udp_ip :
+                if ctrl_split[1] == "device" :
+                    if ctrl_split[2] == "reboot" :
+                        os.system ( 'sudo reboot' )
+                        logging.info ( f"{ctrl.decode()} execution.\n")
+                else :
+                    logging.info ( f"Unknown {ctrl.decode()} command from {address[0]}\n")
+            else :
+                logging.info ( f"Unknown  {ctrl.decode ()} command from {address[0]}\n")
+        except struct.error as e :
+            print ( e )
+
 ################################################################
 ################ LOG Configuration #############################
 ################################################################
@@ -34,26 +63,11 @@ logging.basicConfig ( filename = log_file_name , level = logging.INFO , format =
 
 logging.info ( hello )
 
-src_udp_ctrl_rx = socket.socket ( socket.AF_INET , socket.SOCK_DGRAM )
-src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_device_udp_port ) )
-logging.info ( f"Ctrl device started.")
+data_udp_ctrl_rx = threading.Thread ( target = udp_ctrl_device_thread )
+data_udp_ctrl_rx.start ()
 
 while True :
-    try :
-        ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
-        logging.info ( f" Got {ctrl.decode ()} from {address[0]}\n")
-        ctrl_split = ( ctrl.decode ().split ( '.' ) )
-        if ctrl_split[0] == "ctrl" and address[0] in ctrl_udp_ip :
-            if ctrl_split[1] == "device" :
-                if ctrl_split[2] == "reboot" :
-                    os.system ( 'sudo reboot' )
-                    logging.info ( f"{ctrl.decode()} execution.\n")
-            else :
-                logging.info ( f"Unknown {ctrl.decode()} command from {address[0]}\n")
-        else :
-            logging.info ( f"Unknown  {ctrl.decode ()} command from {address[0]}\n")
-    except struct.error as e :
-        print ( e )
+    pass
 
 ################# CLOSE DATA COM PORT FILE ######################
 #src_udp_data_rx.close ()
