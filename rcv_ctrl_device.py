@@ -16,7 +16,7 @@ import threading
 ################################################################
 ######################## DEFINITIONS ###########################
 ################################################################
-src_udp_ip                      = socket.gethostbyname ( socket.gethostname () )
+#src_udp_ip                      = socket.gethostbyname ( socket.gethostname () )
 src_udp_ip                      = '0.0.0.0'
 ctrl_device_udp_port            = 10003
 ctrl_udp_port                   = 10004

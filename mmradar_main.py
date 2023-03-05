@@ -58,9 +58,10 @@ saved_parsed_data_file_name     = 'saved_parsed_data/mmradar.data.json'
 saved_bin_data_file_name        = 'saved_bin_data/mmradar_gen_1675746223207587500.bin_raw_data'
 cfg_chirp_full_file_name        = 'chirp_cfg/ISK_6m_staticRetention.cfg'
 cfg_chirp_start_file_name       = 'chirp_cfg/sensor_start.cfg'
-src_udp_ip                      = socket.gethostbyname ( socket.gethostname () )
-#dst_udp_ip                      = '10.0.0.102' # Lipków MW50-SV0
-dst_udp_ip                      = '10.0.0.157' # Lipków raspberry pi 3b+
+#src_udp_ip                      = socket.gethostbyname ( socket.gethostname () ) # works only on Windows
+src_udp_ip                      = '0.0.0.0' # works also on Linux
+dst_udp_ip                      = '10.0.0.102' # Lipków MW50-SV0
+#dst_udp_ip                      = '10.0.0.157' # Lipków raspberry pi 3b+
 #dst_udp_ip                      = '192.168.43.227' # maczem raspberry pi 3b+
 #dst_udp_ip                      = '192.168.43.215' # maczem GO3
 #dst_udp_ip                      = '127.0.0.1' # localhost
@@ -76,7 +77,7 @@ def data_udp_ctrl_rx_thread () :
     while True :
         try :
             ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
-            logging.info ( f"############# Got {ctrl.decode ()} from {address[0]}\n")
+            logging.info ( f"Received {ctrl.decode ()} command from {address[0]}")
             ctrl_split = ( ctrl.decode ().split ( '.' ) )
             if ctrl_split[0] == "ctrl" and address[0] in ctrl_udp_ip :
                 if ctrl_split[1] == 'data_dst' :
@@ -89,15 +90,15 @@ def data_udp_ctrl_rx_thread () :
                     elif ctrl_split[2] == '3' :
                         data_dst = 3
                     else :
-                        logging.info ( f"############# Unknown data_dst value {ctrl_split[2]} from {address[0]}\n")
+                        logging.info ( f"Unknown data_dst value {ctrl_split[2]} from {address[0]}")
                 if ctrl_split[1] == "data_dst_frame_divider" :
                     if ctrl_split[2].isdigit()  :
                         data_dst_frame_divider = int ( ctrl_split[2] ) if int ( ctrl_split[2] ) >= 1 else 1
                 if ctrl_split[1] == "device" :
                     if ctrl_split[2] == "reboot" :
-                        os.system ( 'sudo reboot' )
+                        logging.info ( f"Wrong port for {ctrl.decode ()} command from {address[0]}")
             else :
-                logging.info ( f"############# Unknown command {ctrl.decode ()} from {address[0]}\n")
+                logging.info ( f"Unknown {ctrl.decode ()} command from {address[0]}")
         except struct.error as e :
             print ( e )
     #src_udp_ctrl_rx.close ()
