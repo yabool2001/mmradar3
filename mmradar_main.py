@@ -13,7 +13,7 @@
 # cd /home/mzemlo/mmradar3
 # python mmradar_main3.py
 # tail -f mmradar.log
-# sudo tcpdump -A  port 10005ad
+# sudo tcpdump -A  port 10005
 # Rx test in linux system: sudo tcpdump -vv -A udp dst port 10004
 # Tx test in linux system: echo -n "ctrl.data_dst.3" >/dev/udp/10.0.0.102/10004
 # Tx test in linux system: echo -n "ctrl.data_dst_frame_divider.100" >/dev/udp/10.0.0.102/10004
@@ -89,7 +89,7 @@ def data_udp_ctrl_rx_thread () :
                     elif ctrl_split[2] == '3' :
                         data_dst = 3
                     else :
-                        logging.info ( f"############# Got unknownk data_dst value {ctrl_split[2]} from {address[0]}\n")
+                        logging.info ( f"############# Unknown data_dst value {ctrl_split[2]} from {address[0]}\n")
                 if ctrl_split[1] == "data_dst_frame_divider" :
                     if ctrl_split[2].isdigit()  :
                         data_dst_frame_divider = int ( ctrl_split[2] ) if int ( ctrl_split[2] ) >= 1 else 1
@@ -97,7 +97,7 @@ def data_udp_ctrl_rx_thread () :
                     if ctrl_split[2] == "reboot" :
                         os.system ( 'sudo reboot' )
             else :
-                logging.info ( f"############# Got unknownk command {ctrl.decode ()} from {address[0]}\n")
+                logging.info ( f"############# Unknown command {ctrl.decode ()} from {address[0]}\n")
         except struct.error as e :
             print ( e )
     #src_udp_ctrl_rx.close ()
@@ -116,9 +116,6 @@ hello = "\n\n##########################################\n############# mmradar s
 
 LOG_FORMAT = '%(asctime)s;%(message)s;%(funcName)s;line:%(lineno)d;%(levelname)s'
 logging.basicConfig ( filename = log_file_name , level = logging.INFO , format = LOG_FORMAT )
-logging.info (f"\n")
-logging.info ( f"########## Hello mmradar app! ##############" )
-logging.info ( f"########## 'main.py' has started! ##########" )
 
 ################################################################
 ################ SERIALS COMM CONFiguration ####################
@@ -128,7 +125,7 @@ logging.info ( f"########## 'main.py' has started! ##########" )
 ####################### START PROGRAM ##########################
 ################################################################
 
-print ( hello )
+logging.info ( hello )
 
 ### READ DATA
 if data_src == 0 :
