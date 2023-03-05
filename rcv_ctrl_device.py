@@ -17,6 +17,7 @@ import threading
 ######################## DEFINITIONS ###########################
 ################################################################
 src_udp_ip                      = socket.gethostbyname ( socket.gethostname () )
+src_udp_ip                      = '0.0.0.0'
 ctrl_device_udp_port            = 10003
 ctrl_udp_port                   = 10004
 data_udp_port                   = 10005
@@ -37,11 +38,12 @@ logging.info ( hello )
 src_udp_ctrl_rx = socket.socket ( socket.AF_INET , socket.SOCK_DGRAM )
 src_udp_ctrl_rx.bind ( ( src_udp_ip , ctrl_device_udp_port ) )
 logging.info ( f"Ctrl device started.")
+logging.info ( f"{src_udp_ctrl_rx.getsockname()}\n")
 
 while True :
     try :
-        ctrl , address = src_udp_ctrl_rx.recvfrom ( 4096 )
-        logging.info ( f" Got {ctrl.decode ()} from {address[0]}\n")
+        ctrl , address = src_udp_ctrl_rx.recvfrom ( 1024 )
+        logging.info ( f"Got {ctrl.decode ()} from {address[0]}\n")
         ctrl_split = ( ctrl.decode ().split ( '.' ) )
         if ctrl_split[0] == "ctrl" and address[0] in ctrl_udp_ip :
             if ctrl_split[1] == "device" :
