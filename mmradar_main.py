@@ -46,8 +46,8 @@ import time
 data_src                        = 0 # 0: device, 1: UDP, 2: file
 cfg_chirp                       = 2 # 0: no cfg, 1: sensor start, 2: full cfg
 cfg_ctrl                        = 1 # 0: no cfg, 1: udp cfg
-data_dst                        = 0 # 0: no dst, 1: UDP, 2: Azure, 3: file
-data_dst_frame_divider          = 100 # co która ramka ma być zapisywana
+data_dst                        = 1 # 0: no dst, 1: UDP, 2: Azure, 3: file
+data_dst_frame_divider          = 10 # co która ramka ma być zapisywana
 ctrl_start                      = 0
 raw_byte                        = bytes(1)
 frames_limit                    = 0
@@ -84,6 +84,7 @@ def data_udp_ctrl_rx_thread () :
                         data_dst = 0
                     elif ctrl_split[2] == '1' :
                         data_dst = 1
+                        logging.info ( f"Command {ctrl.decode ()} executed.")
                     elif ctrl_split[2] == '2' :
                         data_dst = 2
                     elif ctrl_split[2] == '3' :
